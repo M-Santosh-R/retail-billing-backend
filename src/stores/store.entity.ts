@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import { User } from '../users/user.entity';
 
 @Entity('stores')
 export class Store {
@@ -26,8 +27,17 @@ export class Store {
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
+  @Column({ name: 'max_devices', default: 2 })
+  maxDevices: number;
+
   @Column({ name: 'footer_message', default: 'Thank You. Visit Again.', nullable: true })
   footerMessage: string;
+
+  @Column({ name: 'invoice_prefix', default: 'INV' })
+  invoicePrefix: string;
+
+  @OneToMany(() => User, (user) => user.store)
+  users: User[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

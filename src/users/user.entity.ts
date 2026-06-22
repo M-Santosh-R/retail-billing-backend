@@ -21,7 +21,7 @@ export class User {
   @Column({ name: 'store_id', nullable: true })
   storeId: string;
 
-  @ManyToOne(() => Store)
+  @ManyToOne(() => Store, (store) => store.users)
   @JoinColumn({ name: 'store_id' })
   store: Store;
 

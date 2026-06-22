@@ -28,6 +28,17 @@ export class ReportsService {
     return { todaySales, weeklySales, monthlySales, totalBills };
   }
 
+  async getPeriodSummary(storeId: string, startDate: string, endDate: string) {
+    const from = new Date(startDate);
+    const to   = new Date(new Date(endDate).setHours(23, 59, 59));
+    const result = await this.getSalesInRange(storeId, from, to);
+    return {
+      total: result.total,
+      count: result.count,
+      average: result.count > 0 ? parseFloat((result.total / result.count).toFixed(2)) : 0,
+    };
+  }
+
   private async getSalesInRange(storeId: string, from: Date, to: Date) {
     const result = await this.billRepo
       .createQueryBuilder('bill')

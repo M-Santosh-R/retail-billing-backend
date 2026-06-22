@@ -68,7 +68,7 @@ export class AuthService {
     });
 
     if (!existingDevice) {
-      const maxDevices = this.configService.get<number>('MAX_DEVICES_PER_ACCOUNT') || 2;
+      const maxDevices = user.store?.maxDevices ?? this.configService.get<number>('MAX_DEVICES_PER_ACCOUNT') ?? 2;
       const activeDevices = await this.deviceRepo.count({
         where: { userId: user.id, isActive: true },
       });

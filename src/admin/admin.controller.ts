@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, Delete, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, Post, Delete, UseGuards, Request, Query, ForbiddenException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
@@ -26,6 +26,38 @@ export class AdminController {
     return this.adminService.getAllStores();
   }
 
+  @Post('stores')
+  @ApiOperation({ summary: 'Create a new store with owner' })
+  createStore(@Request() req, @Body() dto: { storeName: string; address?: string; phone?: string; gstNumber?: string; ownerName: string; ownerEmail: string; ownerPassword: string }) {
+    this.requireAdmin(req);
+    return this.adminService.createStore(dto);
+  }
+
+  @Get('stores/:storeId')
+  @ApiOperation({ summary: 'Get single store details' })
+  getStore(@Request() req, @Param('storeId') storeId: string) {
+    this.requireAdmin(req);
+    return this.adminService.getStore(storeId);
+  }
+
+  @Put('stores/:storeId/details')
+  @ApiOperation({ summary: 'Update store details' })
+  updateStoreDetails(
+    @Request() req,
+    @Param('storeId') storeId: string,
+    @Body() dto: { name?: string; address?: string; phone?: string; gstNumber?: string; footerMessage?: string; invoicePrefix?: string },
+  ) {
+    this.requireAdmin(req);
+    return this.adminService.updateStoreDetails(storeId, dto);
+  }
+
+  @Delete('stores/:storeId')
+  @ApiOperation({ summary: 'Delete a store and all its data' })
+  deleteStore(@Request() req, @Param('storeId') storeId: string) {
+    this.requireAdmin(req);
+    return this.adminService.deleteStore(storeId);
+  }
+
   @Put('stores/:storeId/subscription')
   @ApiOperation({ summary: 'Update store subscription' })
   updateSubscription(
@@ -51,9 +83,47 @@ export class AdminController {
     return this.adminService.forceLogoutDevice(deviceId);
   }
 
+  @Get('stores/:storeId/bills')
+  @ApiOperation({ summary: 'List bills for a store' })
+  getStoreBills(
+    @Request() req,
+    @Param('storeId') storeId: string,
+    @Query('search') search?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    this.requireAdmin(req);
+    return this.adminService.getStoreBills(storeId, {
+      search, startDate, endDate,
+      page:  page  ? parseInt(page)  : 1,
+      limit: limit ? parseInt(limit) : undefined,
+    });
+  }
+
+  @Get('stores/:storeId/bills/:billId')
+  @ApiOperation({ summary: 'Get a single bill for a store' })
+  getStoreBill(@Request() req, @Param('storeId') storeId: string, @Param('billId') billId: string) {
+    this.requireAdmin(req);
+    return this.adminService.getStoreBill(storeId, billId);
+  }
+
+  @Get('stores/:storeId/reports')
+  @ApiOperation({ summary: 'Get reports for a store' })
+  getStoreReports(
+    @Request() req,
+    @Param('storeId') storeId: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    this.requireAdmin(req);
+    return this.adminService.getStoreReports(storeId, startDate, endDate);
+  }
+
   private requireAdmin(req: any) {
     if (req.user.role !== 'admin') {
-      throw new Error('Forbidden');
+      throw new ForbiddenException();
     }
   }
 }
