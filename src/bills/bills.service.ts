@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, ILike, MoreThanOrEqual, LessThan } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { Bill } from './bill.entity';
 import { BillItem } from './bill-item.entity';
 import { Store } from '../stores/store.entity';
@@ -53,7 +53,9 @@ export class BillsService {
   }
 
   async findAll(storeId: string, options: { search?: string; startDate?: string; endDate?: string; page?: number; limit?: number }) {
-    const { search, startDate, endDate, page = 1, limit = 20 } = options;
+    const { search, startDate, endDate } = options;
+    const page = Number(options.page) || 1;
+    const limit = Number(options.limit) || 20;
     const qb = this.billRepo
       .createQueryBuilder('bill')
       .leftJoinAndSelect('bill.items', 'items')
