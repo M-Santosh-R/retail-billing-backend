@@ -20,7 +20,7 @@ export class Bill {
   @Column({ name: 'total_amount', type: 'decimal', precision: 10, scale: 2 })
   totalAmount: number;
 
-  @OneToMany(() => BillItem, (bi) => bi.bill, { cascade: true, eager: true })
+  @OneToMany(() => BillItem, (bi) => bi.bill, { cascade: true })
   items: BillItem[];
 
   @CreateDateColumn({ name: 'created_at' })
